@@ -1,14 +1,17 @@
 package server
 
 import(
-    "fmt"
-    //"database/sql"
-    //"github.com/gorilla/mux"
-    //_ "github.com/go-sql-driver/mysql"
-    //"github.com/go-redis/redis"
     "testing"
 )
 
 func TestInitialize(t *testing.T) {
-    fmt.Println(App.Router.Get("/register"))
+    if App.Router == nil {
+        t.Errorf("Router was not initialized")
+    }
+    if App.DB == nil {
+        t.Errorf("Database connection was not initialized")
+    }
+    if App.Redis == nil {
+        t.Errorf("Redis connection was not initialized")
+    }
 }
