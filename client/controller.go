@@ -1,4 +1,4 @@
-package user
+package client
 
 import(
     "encoding/json"
@@ -7,7 +7,7 @@ import(
     "net/http"
 )
 
-func RegisterAction(w http.ResponseWriter, r *http.Request) {
+func CreateClientAction(w http.ResponseWriter, r *http.Request) {
     var body []byte
     var err error
 	if body, err = ioutil.ReadAll(io.LimitReader(r.Body, 4096)); err != nil {
@@ -21,13 +21,13 @@ func RegisterAction(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(400)
         return
     }
-    user, err := CreateUser(data["username"], []byte(data["password"]))
+    client, err := CreateClient(data["name"])
     if err != nil {
         panic(err)
     }
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(201)
-    if err = json.NewEncoder(w).Encode(&user); err != nil {
+    if err = json.NewEncoder(w).Encode(&client); err != nil {
         panic(err)
     }
 }
