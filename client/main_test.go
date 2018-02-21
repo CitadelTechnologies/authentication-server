@@ -1,4 +1,4 @@
-package user
+package client
 
 import(
     "os"
@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 }
 
 func initializeRouter(s *server.Server) {
-    s.Router.HandleFunc("/register", RegisterAction).Methods("POST")
+    s.Router.HandleFunc("/clients", CreateClientAction).Methods("POST")
 }
 
 func initializeDatabase() {

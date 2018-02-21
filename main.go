@@ -2,6 +2,7 @@ package main
 
 import(
     "os"
+    "ct-authentication-server/client"
     "ct-authentication-server/server"
     "ct-authentication-server/user"
 )
@@ -22,5 +23,6 @@ func main() {
 }
 
 func initializeRouter(s *server.Server) {
-    s.Router.HandleFunc("/register", user.Register).Methods("POST")
+    s.Router.HandleFunc("/clients", client.CreateClientAction).Methods("POST")
+    s.Router.HandleFunc("/register", user.RegisterAction).Methods("POST")
 }
