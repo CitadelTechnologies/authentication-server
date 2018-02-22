@@ -11,8 +11,10 @@ import(
 )
 
 func TestCreateClientAction(t *testing.T) {
+    redirectUrl := "http://local.la-citadelle.net"
     data, _ := json.Marshal(map[string]string{
         "name": "space_client",
+        "redirect_url": redirectUrl,
     })
     req, _ := http.NewRequest("POST", "/clients", bytes.NewBuffer(data))
     response := executeRequest(req)
@@ -27,6 +29,9 @@ func TestCreateClientAction(t *testing.T) {
     }
     if client.Name != "space_client" {
         t.Errorf("Name was incorrect, got '%s', want '%s'", client.Name, "space_client")
+    }
+    if client.RedirectUrl != redirectUrl {
+        t.Errorf("Redirect URL was incorrect, got '%s', want '%s'", client.RedirectUrl, redirectUrl)
     }
     if client.CreatedAt.Before(time.Now()) == false {
         t.Errorf("Creation date was incorrect, got '%s'", client.CreatedAt)

@@ -21,7 +21,7 @@ func CreateClientAction(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(400)
         return
     }
-    client, err := CreateClient(data["name"])
+    client, err := CreateClient(data["name"], data["redirect_url"])
     if err != nil {
         panic(err)
     }
