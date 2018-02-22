@@ -41,6 +41,33 @@ func TestCreateClientAction(t *testing.T) {
     }
 }
 
+func TestGetClientAction(t *testing.T) {
+    redirectUrl := "http://local.la-citadelle.net"
+    req, _ := http.NewRequest("GET", "/clients?name=space_client", bytes.NewBuffer([]byte("")))
+    response := executeRequest(req)
+
+    if response.Code != http.StatusOK {
+        t.Errorf("Status code was incorrect, got %d, want %d", response.Code, http.StatusOK)
+    }
+    var client Client
+    json.Unmarshal([]byte(response.Body.String()), &client)
+    if client.Id != 1 {
+        t.Errorf("ID was incorrect, got %d, want %d", client.Id, 1)
+    }
+    if client.Name != "space_client" {
+        t.Errorf("Name was incorrect, got '%s', want '%s'", client.Name, "space_client")
+    }
+    if client.RedirectUrl != redirectUrl {
+        t.Errorf("Redirect URL was incorrect, got '%s', want '%s'", client.RedirectUrl, redirectUrl)
+    }
+    if client.CreatedAt.Before(time.Now()) == false {
+        t.Errorf("Creation date was incorrect, got '%s'", client.CreatedAt)
+    }
+    if client.UpdatedAt.Before(time.Now()) == false {
+        t.Errorf("Creation date was incorrect, got '%s'", client.UpdatedAt)
+    }
+}
+
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {
     rr := httptest.NewRecorder()
     server.App.Router.ServeHTTP(rr, req)

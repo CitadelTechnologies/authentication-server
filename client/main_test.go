@@ -31,6 +31,7 @@ func TestMain(m *testing.M) {
 
 func initializeRouter(s *server.Server) {
     s.Router.HandleFunc("/clients", CreateClientAction).Methods("POST")
+    s.Router.HandleFunc("/clients", GetClientAction).Methods("GET")
 }
 
 func initializeDatabase() {

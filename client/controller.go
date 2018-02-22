@@ -31,3 +31,25 @@ func CreateClientAction(w http.ResponseWriter, r *http.Request) {
         panic(err)
     }
 }
+
+func GetClientAction(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    name := r.URL.Query().Get("name")
+
+    if name == "" {
+        w.WriteHeader(http.StatusBadRequest)
+        json.NewEncoder(w).Encode(&struct{
+            Message string `json:"message"`
+        }{
+            Message: "Name parameter is missing",
+        })
+        return
+    }
+
+    client, err := GetClient(name)
+
+    w.Header().Set("Content-Type", "application/json")
+    if err = json.NewEncoder(w).Encode(&client); err != nil {
+        panic(err)
+    }
+}

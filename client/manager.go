@@ -30,3 +30,21 @@ func CreateClient(name, redirectUrl string) (*Client, error) {
     client.Id = uint(id)
     return &client, nil
 }
+
+func GetClient(name string) (*Client, error) {
+    client := Client{
+        Name: name,
+    }
+    err := server.App.DB.QueryRow("SELECT id, token, secret, redirect_url, created_at, updated_at FROM client__clients WHERE name = ?", name).Scan(
+        &client.Id,
+        &client.Token,
+        &client.Secret,
+        &client.RedirectUrl,
+        &client.CreatedAt,
+        &client.UpdatedAt,
+    )
+    if err != nil {
+        return nil, err
+    }
+    return &client, nil
+}
