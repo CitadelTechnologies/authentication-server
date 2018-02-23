@@ -20,6 +20,7 @@ func TestMain(m *testing.M) {
         os.Getenv("REDIS_HOST"),
         os.Getenv("REDIS_PORT"),
         os.Getenv("REDIS_PASSWORD"),
+        os.Getenv("GOPATH") + "/src/ct-authentication-server",
     )
     initDatabase()
     code := m.Run()
