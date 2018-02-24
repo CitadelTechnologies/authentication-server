@@ -18,7 +18,7 @@ type Server struct {
 
 var App Server
 
-func (s *Server) Initialize(dbHost, dbUser, dbPassword, dbName, redisHost, redisPassword, redisPort, rootPath string) {
+func (s *Server) Initialize(dbHost, dbUser, dbPassword, dbName, redisHost, redisPort, redisPassword, rootPath string) {
     var err error
     if s.DB, err = sql.Open("mysql", dbUser + ":" + dbPassword + "@tcp(" + dbHost + ")/" + dbName + "?parseTime=true"); err != nil {
         panic(err)

@@ -45,5 +45,5 @@ func initDatabase() {
 }
 
 func clearDatabase() {
-    migration.Drop()
+    migration.Down()
 }
