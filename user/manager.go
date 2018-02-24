@@ -1,8 +1,11 @@
 package user
 
 import(
+    "ct-authentication-server/client"
+    "ct-authentication-server/security"
     "ct-authentication-server/server"
     "golang.org/x/crypto/bcrypt"
+    "github.com/go-sql-driver/mysql"
     "time"
 )
 
@@ -29,6 +32,51 @@ func CreateUser(username string, password []byte) (*User, error) {
         return nil, err
     }
     user.Id = uint(id)
+    return &user, nil
+}
+
+func Connect(service *client.Client, username string, password []byte) (*User, error) {
+    user, err := GetUserByUsername(username)
+    if err != nil {
+        return nil, err
+    }
+    if err := bcrypt.CompareHashAndPassword(user.Password, password); err != nil {
+        return nil, err
+    }
+    user.AccessToken = security.GenerateRandomToken(32)
+    user.RefreshToken = security.GenerateRandomToken(32)
+    user.ExpiresAt = time.Now().Add(time.Hour * time.Duration(2))
+    err = server.App.Redis.HMSet("user__" + string(user.AccessToken), map[string]interface{}{
+        "username": user.Username,
+        "access_token": user.AccessToken,
+        "refresh_token": user.RefreshToken,
+        "expires_at": user.ExpiresAt,
+        "created_at": user.CreatedAt,
+        "last_connected_at": user.LastConnectedAt,
+    }).Err()
+    if err != nil {
+        return nil, err
+    }
+    return user, nil
+}
+
+func GetUserByUsername(username string) (*User, error) {
+    user := User{
+        Username: username,
+    }
+    var createdAt mysql.NullTime
+    var lastConnectedAt mysql.NullTime
+    err := server.App.DB.QueryRow("SELECT id, password, created_at, last_connected_at FROM user__users WHERE username = ?", username).Scan(
+        &user.Id,
+        &user.Password,
+        &createdAt,
+        &lastConnectedAt,
+    )
+    user.CreatedAt = createdAt.Time
+    user.LastConnectedAt = lastConnectedAt.Time
+    if err != nil {
+        return nil, err
+    }
     return &user, nil
 }
 

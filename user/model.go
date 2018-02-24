@@ -11,6 +11,7 @@ type(
         Password []byte `json:"-"`
         AccessToken []byte `json:"access_token"`
         RefreshToken []byte `json:"refresh_token"`
+        ExpiresAt time.Time `json:"expires_at"`
         CreatedAt time.Time `json:"created_at"`
         LastConnectedAt time.Time `json:"last_connected_at"`
     }
