@@ -33,4 +33,5 @@ REDIS_PASSWORD=redis_password
 
 You can read the API documentation here:
 
-* [Registration](./doc/registration.md)
+* [Services](./doc/services.md)
+* [Users](./doc/users.md)
