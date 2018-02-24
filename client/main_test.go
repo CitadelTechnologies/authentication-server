@@ -21,6 +21,7 @@ func TestMain(m *testing.M) {
         os.Getenv("REDIS_HOST"),
         os.Getenv("REDIS_PORT"),
         os.Getenv("REDIS_PASSWORD"),
+        os.Getenv("GOPATH") + "/src/ct-authentication-server",
     )
     initializeRouter(&server.App)
     initializeDatabase()
@@ -31,7 +32,8 @@ func TestMain(m *testing.M) {
 
 func initializeRouter(s *server.Server) {
     s.Router.HandleFunc("/clients", CreateClientAction).Methods("POST")
-    s.Router.HandleFunc("/clients", GetClientAction).Methods("GET")
+    s.Router.HandleFunc("/clients/{id}", GetClientAction).Methods("GET")
+    s.Router.HandleFunc("/clients/{id}/domains", AddDomainAction).Methods("POST")
 }
 
 func initializeDatabase() {
@@ -51,5 +53,5 @@ func initializeDatabase() {
 }
 
 func clearDatabase() {
-    migration.Drop()
+    migration.Down()
 }

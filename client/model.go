@@ -14,4 +14,8 @@ type(
         CreatedAt time.Time `json:"created_at"`
         UpdatedAt time.Time `json:"updated_at"`
     }
+    Domain struct {
+        Name string `json:"name"`
+        Client *Client `json:"client"`
+    }
 )

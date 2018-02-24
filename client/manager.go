@@ -3,6 +3,7 @@ package client
 import(
     "ct-authentication-server/security"
     "ct-authentication-server/server"
+    "strings"
     "time"
 )
 
@@ -31,12 +32,43 @@ func CreateClient(name, redirectUrl string) (*Client, error) {
     return &client, nil
 }
 
-func GetClient(name string) (*Client, error) {
-    client := Client{
+func AddDomainToClient(client *Client, name string) (*Domain, error) {
+    domain := Domain{
+        Client: client,
         Name: name,
     }
-    err := server.App.DB.QueryRow("SELECT id, token, secret, redirect_url, created_at, updated_at FROM client__clients WHERE name = ?", name).Scan(
-        &client.Id,
+    stmt, err := server.App.DB.Prepare("INSERT INTO client__domains(name, client_id) VALUES(?, ?)")
+    if err != nil {
+        return nil, err
+    }
+    if _, err = stmt.Exec(domain.Name, domain.Client.Id); err != nil {
+        return nil, err
+    }
+    return &domain, nil
+}
+
+func GetAllowedDomains(client *Client) string {
+    rows, err := server.App.DB.Query("SELECT name FROM client__domains WHERE client_id = ?", client.Id)
+    if err != nil {
+        return ""
+    }
+    defer rows.Close()
+    for rows.Next() {
+        var domain string
+        rows.Scan(&domain)
+        if strings.Contains(client.RedirectUrl, domain) {
+            return domain
+        }
+    }
+    return ""
+}
+
+func GetClient(id uint) (*Client, error) {
+    client := Client{
+        Id: id,
+    }
+    err := server.App.DB.QueryRow("SELECT name, token, secret, redirect_url, created_at, updated_at FROM client__clients WHERE id = ?", id).Scan(
+        &client.Name,
         &client.Token,
         &client.Secret,
         &client.RedirectUrl,
