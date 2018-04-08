@@ -8,11 +8,8 @@ func TestCreateClient(t *testing.T) {
     name := "chat_client"
     redirectUrl := "http://local.la-citadelle.net"
 
-    client, err := CreateClient(name, redirectUrl)
+    client := CreateClient(name, redirectUrl)
 
-    if err != nil {
-        t.Errorf("Client creation failed, got error '%s'", err.Error())
-    }
     if client.Name != name {
         t.Errorf("Name was incorrect, got '%s', want '%s'", client.Name, name)
     }

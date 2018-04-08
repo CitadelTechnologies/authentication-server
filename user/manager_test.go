@@ -11,11 +11,8 @@ func TestCreateUser(t *testing.T) {
     username := "Toto"
     password := []byte("overki11P4$$W0RD")
 
-    user, exception := CreateUser(username, password)
+    user := CreateUser(username, password)
 
-    if exception != nil {
-        t.Errorf("User creation failed, got exception '%s'", exception.Message)
-    }
     if user.Username != username {
         t.Errorf("Username was incorrect, got '%s', want '%s'", user.Username, username)
     }
@@ -34,11 +31,8 @@ func testConnect(t *testing.T) {
         Name: "space_client",
         RedirectUrl: "http://local.la-citadelle.net",
     }
-    user, exception := Connect(service, username, password)
+    user := Connect(service, username, password)
 
-    if exception != nil {
-        t.Errorf("User connection failed, got error '%s'", exception.Message)
-    }
     if user.AccessToken == nil {
         t.Errorf("Access Token was not set")
     }
