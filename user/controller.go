@@ -48,7 +48,11 @@ func LoginAction(w http.ResponseWriter, r *http.Request) {
     service := client.GetClient(uint(serviceId))
     user := Connect(service, data["username"], []byte(data["password"]))
 
-    w.Header().Set("Access-Control-Allow-Origin", client.GetAllowedDomains(service))
-    w.Header().Set("Location", string(service.RedirectUrl) + "?access_token=" + string(user.AccessToken))
-    w.WriteHeader(302)
+    if r.Host == server.App.Origin {
+        w.Header().Set("Access-Control-Allow-Origin", client.GetAllowedDomains(service))
+        w.Header().Set("Location", string(service.RedirectUrl) + "?access_token=" + string(user.AccessToken))
+        w.WriteHeader(302)
+        return
+    }
+    server.SendJsonResponse(w, 200, user)
 }

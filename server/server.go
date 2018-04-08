@@ -14,11 +14,12 @@ type Server struct {
     Router *mux.Router
     DB *sql.DB
     RootPath string
+    Origin string
 }
 
 var App Server
 
-func (s *Server) Initialize(dbHost, dbUser, dbPassword, dbName, redisHost, redisPort, redisPassword, rootPath string) {
+func (s *Server) Initialize(dbHost, dbUser, dbPassword, dbName, redisHost, redisPort, redisPassword, rootPath string, origin string) {
     var err error
     if s.DB, err = sql.Open("mysql", dbUser + ":" + dbPassword + "@tcp(" + dbHost + ")/" + dbName + "?parseTime=true"); err != nil {
         panic(err)
@@ -30,6 +31,7 @@ func (s *Server) Initialize(dbHost, dbUser, dbPassword, dbName, redisHost, redis
 	})
     s.Router = mux.NewRouter()
     s.RootPath = rootPath
+    s.Origin = origin
 }
 
 func (s *Server) Run() {

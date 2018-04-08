@@ -7,6 +7,7 @@ import(
     "encoding/json"
     "net/http"
     "net/http/httptest"
+    "os"
     "strings"
     "testing"
     "time"
@@ -56,6 +57,7 @@ func TestLoginAction(t *testing.T) {
         "service": "1",
     })
     req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(data))
+    req.Host = os.Getenv("SSO_ORIGIN")
     response := executeRequest(req)
 
     if response.Code != http.StatusFound {

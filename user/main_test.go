@@ -22,6 +22,7 @@ func TestMain(m *testing.M) {
         os.Getenv("REDIS_PORT"),
         os.Getenv("REDIS_PASSWORD"),
         os.Getenv("GOPATH") + "/src/ct-authentication-server",
+        os.Getenv("SSO_ORIGIN"),
     )
     initializeRouter(&server.App)
     initializeDatabase()
