@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+    </head>
+    <body>
+        <h1>Connect to {{.ServiceName}}</h1>
+        <form onsubmit="login(event);">
+            <label for="username">Nom d'utilisateur</label>
+            <input type="text" name="username" />
+            <label for="password">Mot de passe</label>
+            <input type="password" name="password" />
+            <input type="hidden" name="service" value="{{.ServiceId}}"/>
+            <button type="submit">Valider</button>
+        </form>
+        <script type="text/javascript">
+            const login = event => {
+                event.preventDefault();
+
+                var username = document.querySelector("input[name='username']").value;
+                var password = document.querySelector("input[name='password']").value;
+                var service = document.querySelector("input[name='service']").value;
+
+                fetch("/login", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        service: service
+                    })
+                }).then(response => { window.location = response.url });
+            };
+        </script>
+    </body>
+</html>

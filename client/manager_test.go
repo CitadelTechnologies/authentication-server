@@ -6,12 +6,10 @@ import(
 
 func TestCreateClient(t *testing.T) {
     name := "chat_client"
+    redirectUrl := "http://local.la-citadelle.net"
 
-    client, err := CreateClient(name)
+    client := CreateClient(name, redirectUrl)
 
-    if err != nil {
-        t.Errorf("Client creation failed, got error '%s'", err.Error())
-    }
     if client.Name != name {
         t.Errorf("Name was incorrect, got '%s', want '%s'", client.Name, name)
     }
@@ -20,6 +18,9 @@ func TestCreateClient(t *testing.T) {
     }
     if len(client.Secret) != 128 {
         t.Errorf("Secret was incorrect, got %d bytes, want %d", len(client.Secret), 128)
+    }
+    if client.RedirectUrl != redirectUrl {
+        t.Errorf("Redirect URL was incorrect, got '%s', want '%s'", client.RedirectUrl, redirectUrl)
     }
     if client.Id != 2 {
         t.Errorf("ID was incorrect, got %d, want 2", client.Id)

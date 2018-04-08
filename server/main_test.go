@@ -20,6 +20,8 @@ func TestMain(m *testing.M) {
         os.Getenv("REDIS_HOST"),
         os.Getenv("REDIS_PORT"),
         os.Getenv("REDIS_PASSWORD"),
+        os.Getenv("GOPATH") + "/src/ct-authentication-server",
+        os.Getenv("SSO_ORIGIN"),
     )
     initDatabase()
     code := m.Run()
@@ -44,5 +46,5 @@ func initDatabase() {
 }
 
 func clearDatabase() {
-    migration.Drop()
+    migration.Down()
 }

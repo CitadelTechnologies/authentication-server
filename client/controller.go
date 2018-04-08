@@ -1,33 +1,37 @@
 package client
 
 import(
-    "encoding/json"
-    "io"
-    "io/ioutil"
+    "ct-authentication-server/server"
     "net/http"
+    "github.com/gorilla/mux"
+    "strconv"
 )
 
 func CreateClientAction(w http.ResponseWriter, r *http.Request) {
-    var body []byte
-    var err error
-	if body, err = ioutil.ReadAll(io.LimitReader(r.Body, 4096)); err != nil {
-        panic(err)
-    }
-	if err = r.Body.Close(); err != nil {
-        panic(err)
-    }
-    var data map[string]string
-    if err = json.Unmarshal(body, &data); err != nil {
-        w.WriteHeader(400)
-        return
-    }
-    client, err := CreateClient(data["name"])
-    if err != nil {
-        panic(err)
-    }
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(201)
-    if err = json.NewEncoder(w).Encode(&client); err != nil {
-        panic(err)
-    }
+    defer server.CatchException(w)
+
+    data := server.DecodeJsonRequest(r)
+    client := CreateClient(data["name"], data["redirect_url"])
+
+    server.SendJsonResponse(w, 201, client)
+}
+
+func AddDomainAction(w http.ResponseWriter, r *http.Request) {
+    defer server.CatchException(w)
+
+    id, _ := strconv.ParseUint(mux.Vars(r)["id"], 10, 16)
+    client := GetClient(uint(id))
+    data := server.DecodeJsonRequest(r)
+    domain := AddDomainToClient(client, data["domain"])
+
+    server.SendJsonResponse(w, 201, domain)
+}
+
+func GetClientAction(w http.ResponseWriter, r *http.Request) {
+    defer server.CatchException(w)
+
+    clientId, _ := strconv.ParseUint(mux.Vars(r)["id"], 10, 16)
+    client := GetClient(uint(clientId))
+
+    server.SendJsonResponse(w, 200, client)
 }

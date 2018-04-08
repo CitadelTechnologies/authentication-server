@@ -1,33 +1,58 @@
 package user
 
 import(
-    "encoding/json"
-    "io"
-    "io/ioutil"
+    "ct-authentication-server/client"
+    "ct-authentication-server/exception"
+    "ct-authentication-server/server"
     "net/http"
+    "html/template"
+    "strconv"
 )
 
 func RegisterAction(w http.ResponseWriter, r *http.Request) {
-    var body []byte
-    var err error
-	if body, err = ioutil.ReadAll(io.LimitReader(r.Body, 4096)); err != nil {
-        panic(err)
+    defer server.CatchException(w)
+
+    data := server.DecodeJsonRequest(r)
+    user := CreateUser(data["username"], []byte(data["password"]))
+
+    server.SendJsonResponse(w, 201, user)
+}
+
+func LoginFormAction(w http.ResponseWriter, r *http.Request) {
+    defer server.CatchException(w)
+
+    clientId := r.URL.Query().Get("clientId")
+    if clientId == "" {
+        panic(exception.New(400, "ID parameter is missing"))
     }
-	if err = r.Body.Close(); err != nil {
-        panic(err)
+    id, _ := strconv.ParseUint(clientId, 10, 16)
+    service := client.GetClient(uint(id))
+    t, err := template.ParseFiles(server.App.RootPath + "/templates/login.html")
+    if err != nil {
+        panic(exception.New(500, "Login Form template could not be parsed"))
     }
-    var data map[string]string
-    if err = json.Unmarshal(body, &data); err != nil {
-        w.WriteHeader(400)
+    t.Execute(w, struct{
+        ServiceId uint
+        ServiceName string
+    }{
+        ServiceId: service.Id,
+        ServiceName: service.Name,
+    })
+}
+
+func LoginAction(w http.ResponseWriter, r *http.Request) {
+    defer server.CatchException(w)
+
+    data := server.DecodeJsonRequest(r)
+    serviceId, _ := strconv.ParseUint(data["service"], 10, 16)
+    service := client.GetClient(uint(serviceId))
+    user := Connect(service, data["username"], []byte(data["password"]))
+
+    if r.Host == server.App.Origin {
+        w.Header().Set("Access-Control-Allow-Origin", client.GetAllowedDomains(service))
+        w.Header().Set("Location", string(service.RedirectUrl) + "?access_token=" + string(user.AccessToken))
+        w.WriteHeader(302)
         return
     }
-    user, err := CreateUser(data["username"], []byte(data["password"]))
-    if err != nil {
-        panic(err)
-    }
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(201)
-    if err = json.NewEncoder(w).Encode(&user); err != nil {
-        panic(err)
-    }
+    server.SendJsonResponse(w, 200, user)
 }
