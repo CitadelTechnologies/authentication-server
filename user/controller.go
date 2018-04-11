@@ -4,6 +4,7 @@ import(
     "ct-authentication-server/client"
     "ct-authentication-server/exception"
     "ct-authentication-server/server"
+    "encoding/base64"
     "github.com/gorilla/mux"
     "net/http"
     "html/template"
@@ -61,5 +62,9 @@ func LoginAction(w http.ResponseWriter, r *http.Request) {
 func GetUserAction(w http.ResponseWriter, r *http.Request) {
     defer server.CatchException(w)
 
-    server.SendJsonResponse(w, 200, GetUserByAccessToken(mux.Vars(r)["access_token"]))
+    accessToken, err := base64.StdEncoding.DecodeString(mux.Vars(r)["access_token"])
+    if err != nil {
+        panic(exception.New(400, "Invalid token"))
+    }
+    server.SendJsonResponse(w, 200, GetUserByAccessToken(string(accessToken)))
 }
