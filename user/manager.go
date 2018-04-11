@@ -7,6 +7,7 @@ import(
     "ct-authentication-server/server"
     "golang.org/x/crypto/bcrypt"
     "github.com/go-sql-driver/mysql"
+    "strconv"
     "time"
 )
 
@@ -48,17 +49,24 @@ func Connect(service *client.Client, username string, password []byte) *User {
     user.RefreshToken = security.GenerateRandomToken(32)
     user.ExpiresAt = time.Now().Add(time.Hour * time.Duration(2))
     err = server.App.Redis.HMSet("user__" + string(user.AccessToken), map[string]interface{}{
+        "id": user.Id,
         "username": user.Username,
         "access_token": user.AccessToken,
         "refresh_token": user.RefreshToken,
-        "expires_at": user.ExpiresAt,
-        "created_at": user.CreatedAt,
-        "last_connected_at": user.LastConnectedAt,
+        "expires_at": user.ExpiresAt.Format(time.RFC3339),
+        "created_at": user.CreatedAt.Format(time.RFC3339),
+        "last_connected_at": user.LastConnectedAt.Format(time.RFC3339),
     }).Err()
     if err != nil {
         panic(exception.New(500, "User Redis session could not be created"))
     }
     return user
+}
+
+func Logout(accessToken string) {
+    if err := server.App.Redis.Del("user__" + accessToken).Err(); err != nil {
+        panic(exception.New(404, "User not found"))
+    }
 }
 
 func GetUserByUsername(username string) (*User, error) {
@@ -79,6 +87,28 @@ func GetUserByUsername(username string) (*User, error) {
         return nil, err
     }
     return &user, nil
+}
+
+func GetUserByAccessToken(accessToken string) *User {
+    data, err := server.App.Redis.HGetAll("user__" + accessToken).Result()
+    if err != nil {
+        panic(exception.New(404, "User not found"))
+    }
+    user := &User{
+        Username: data["username"],
+        AccessToken: []byte(data["access_token"]),
+        RefreshToken: []byte(data["refresh_token"]),
+    }
+    id, _ := strconv.ParseUint(data["id"], 10, 16)
+    user.Id = uint(id)
+    user.ExpiresAt, _ = time.Parse(time.RFC3339, data["expires_at"])
+    user.CreatedAt, _ = time.Parse(time.RFC3339, data["created_at"])
+    user.LastConnectedAt, _ = time.Parse(time.RFC3339, data["last_connected_at"])
+    if user.ExpiresAt.Before(time.Now()) {
+        defer Logout(accessToken)
+        panic(exception.New(401, "Expired session"))
+    }
+    return user
 }
 
 func encodePassword(password []byte) ([]byte, error) {

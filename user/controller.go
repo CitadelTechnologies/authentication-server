@@ -4,6 +4,7 @@ import(
     "ct-authentication-server/client"
     "ct-authentication-server/exception"
     "ct-authentication-server/server"
+    "github.com/gorilla/mux"
     "net/http"
     "html/template"
     "strconv"
@@ -55,4 +56,10 @@ func LoginAction(w http.ResponseWriter, r *http.Request) {
         return
     }
     server.SendJsonResponse(w, 200, user)
+}
+
+func GetUserAction(w http.ResponseWriter, r *http.Request) {
+    defer server.CatchException(w)
+
+    server.SendJsonResponse(w, 200, GetUserByAccessToken(mux.Vars(r)["access_token"]))
 }
