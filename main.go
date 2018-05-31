@@ -31,4 +31,5 @@ func initializeRouter(s *server.Server) {
     s.Router.HandleFunc("/register", user.RegisterAction).Methods("POST")
     s.Router.HandleFunc("/login", user.LoginFormAction).Methods("GET")
     s.Router.HandleFunc("/login", user.LoginAction).Methods("POST")
+    s.Router.HandleFunc("/users/{access_token}", user.GetUserAction).Methods("GET")
 }
